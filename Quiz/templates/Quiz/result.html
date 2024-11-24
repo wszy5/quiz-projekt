@@ -1,25 +1,25 @@
 {% extends 'Quiz/dependencies.html' %}
 
 {% block content %}
+<div class="container d-flex justify-content-center align-items-center" style="height: 100vh;">
 
-<div class="container ">
-        
-    <div class="card-columns" style="padding: 10px; margin: 20px;">
-        <div class="card" align="centre " style="width: 32rem; border:5px black solid">
-            <img class="card-img-top" src="http://kmit.in/emagazine/wp-content/uploads/2018/02/karnataka-results.jpg" alt="Card image cap">
-            <div class="card-body">
-                <h5 class="card-title">Score: {{score}}</h5>
+    <div class="card shadow-lg" style="width: 32rem; background: rgba(255, 255, 255, 0.9); border-radius: 15px; padding: 20px;">        
+        <div class="card-body">
+            <h5 class="card-title text-center" style="font-size: 1.8rem; font-weight: bold;">Wynik</h5>
+            <hr>
+            <h5 class="text-center text-muted">Odpowiedziałeś poprawnie na: {{ correct }}/{{total}} pytań!</h5>
+            <br>
+            <h5 class="text-center text-muted">Tym samym uzyskałeś z tego quizu {{ percent|floatformat:2 }}%</h5>
+            <br>
+            <h6 class="text-center text-muted">Czas trwania: {{ time }} sekund</h5>
 
-                <p class="card-text">Percentage: {{percent}}%</p>
-                <p class="card-text">Time Taken: {{time}} seconds</p>
-                <p class="card-text">Correct answers: {{correct}}</p>
-                <p class="card-text">Incorrect answers: {{wrong}}</p>
-                <p class="card-text">Total questions: {{total}}</p>
-                <h5>All the best for next quiz!</h5>
+                <div class="d-flex justify-content-center">
+                    <a href="{% url 'home' %}" class="btn btn-primary btn-lg" style="border-radius: 10px;">Zacznij od nowa</a>
+                </div>
             </div>
+            <hr>
         </div>
     </div>
 
 </div>
-
 {% endblock %}

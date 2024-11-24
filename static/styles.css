@@ -56,3 +56,87 @@ button.btn-primary:hover {
     color: #6c757d;
     text-align: right;
 }
+
+/* Nowe style formularza logowania */
+
+/* Center the content and style the form */
+.container {
+    margin-top: 50px;
+}
+
+/* Form container */
+.login-card {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 15px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 40px;
+    width: 100%;
+    max-width: 400px;
+}
+
+/* Input fields */
+.form-control {
+    border-radius: 10px;
+    border: 1px solid #ddd;
+    padding: 10px;
+    font-size: 1rem;
+    margin-bottom: 15px;
+}
+
+.form-control:focus {
+    border-color: #28a745;
+    box-shadow: 0 0 5px rgba(40, 167, 69, 0.5);
+}
+
+/* Submit button */
+.btn {
+    width: 100%;
+    padding: 12px;
+    font-size: 1.1rem;
+    border-radius: 10px;
+}
+
+/* Link */
+a {
+    color: #007bff;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* Hover effect for form inputs */
+input[type="text"], input[type="password"] {
+    transition: all 0.3s ease;
+}
+
+input[type="text"]:hover, input[type="password"]:hover {
+    border-color: #28a745;
+}
+
+.navbar {
+    padding: 0.5rem 1rem;
+  }
+  
+  .navbar-nav {
+    align-items: center;
+  }
+  
+  .navbar .greet {
+    font-size: 16px;
+    color: #fff;
+    margin-left: auto;
+    margin-right: 1rem;
+  }
+  
+  .navbar .logout-link {
+    color: #fff;
+    text-decoration: none;
+    font-size: 16px;
+    margin-left: 10px;
+  }
+  
+  .navbar .logout-link:hover {
+    text-decoration: underline;
+  }
+  

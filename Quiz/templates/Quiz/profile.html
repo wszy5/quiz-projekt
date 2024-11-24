@@ -1,0 +1,35 @@
+<!-- profile.html -->
+{% extends 'Quiz/dependencies.html' %}
+{% block content %}
+<div class="container">
+    <h2 class="text-center mb-4">Mój Profil</h2>
+
+    <h4>Średnia z wyników: {{ avg_percent|floatformat:2 }}%</h4>
+
+    <h5 class="mt-4">Twoje wyniki:</h5>
+    {% if results %}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Data</th>
+                    <th>Wynik</th>
+                    <th>Procent</th>
+                    <th>Czas</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for result in results %}
+                    <tr>
+                        <td>{{ result.created_at }}</td>
+                        <td>{{ result.score }} / {{ result.total }}</td>
+                        <td>{{ result.percent|floatformat:2 }}%</td>
+                        <td>{{ result.time }} sek.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>Brak wyników.</p>
+    {% endif %}
+</div>
+{% endblock %}

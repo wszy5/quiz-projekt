@@ -1,24 +1,25 @@
-from django.forms import ModelForm
 from django import forms
-from .models import *
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
+from .models import UserProfile
 
 class createuserform(UserCreationForm):
-    class Meta:
-        model=User
-        fields=['username','password'] 
-
-class addQuestionform(ModelForm):
-    class Meta:
-        model=QuesModel
-        fields="__all__"
-    
-class QuestionCountForm(forms.Form):
-    num_questions = forms.IntegerField(
-        min_value=1,
-        max_value=100,  # Zmienna maksymalna liczba pytań, np. 100
-        initial=10,     # Domyślna liczba pytań
-        label="Ile pytań chcesz rozwiązać?",
-        widget=forms.NumberInput(attrs={'class': 'form-control'})
+    pin = forms.CharField(
+        max_length=6,
+        required=False,  # PIN jest opcjonalny
+        widget=forms.PasswordInput(attrs={'placeholder': 'Podaj PIN (opcjonalnie)'}),
+        help_text="Opcjonalnie: maksymalnie 6 cyfr"
     )
+
+    class Meta:
+        model = User
+        fields = ['username', 'password1', 'password2']
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        if commit:
+            user.save()
+            # Tworzymy profil użytkownika i przypisujemy PIN, jeśli podano
+            if self.cleaned_data['pin']:
+                UserProfile.objects.create(user=user, pin=self.cleaned_data['pin'])
+        return user
