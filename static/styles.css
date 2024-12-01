@@ -7,6 +7,7 @@ body {
     background-repeat: no-repeat; /* Prevents tiling of the image */
     margin: 0;
     padding: 0;
+    background-size: 80%;
 }
 
 /* Nagłówek */
@@ -115,7 +116,7 @@ input[type="text"]:hover, input[type="password"]:hover {
 }
 
 .navbar {
-    padding: 0.5rem 1rem;
+    padding: 0.3rem 0.8rem;
   }
   
   .navbar-nav {
@@ -138,5 +139,9 @@ input[type="text"]:hover, input[type="password"]:hover {
   
   .navbar .logout-link:hover {
     text-decoration: underline;
+  }
+  
+  .tile {
+    color: red;
   }
   

@@ -5,41 +5,90 @@ from .models import *
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status, permissions
+from .models import QuesModel
+from .serializers import QuesModelSerializer, UserSerializer
+from django.contrib.auth.models import User
+from rest_framework.permissions import AllowAny
+from django.http import JsonResponse
+from django.middleware.csrf import get_token
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from Quiz.models import QuesModel
 
-# def home(request):
-#     if request.method == 'POST':
-#         print(request.POST)
-#         questions = QuesModel.objects.all()
-#         score = 0
-#         wrong = 0
-#         correct = 0
-#         total = 0
-#         for q in questions:
-#             total += 1
-#             user_answer = request.POST.get(str(q.id)) 
-#             print(f"User answer for {q.question}: {user_answer}")
-#             print(f"Correct answer: {q.correct_option}")
-#             print()
-#             if str(q.correct_option) == user_answer: 
-#                 score += 10
-#                 correct += 1
-#             else:
-#                 wrong += 1
-#         percent = score / (total * 10) * 100
-#         context = {
-#             'score': score,
-#             'time': request.POST.get('timer'),
-#             'correct': correct,
-#             'wrong': wrong,
-#             'percent': percent,
-#             'total': total,
-#         }
-#         return render(request, 'Quiz/result.html', context)
-#     else:
-#         questions = QuesModel.objects.all()
-#         context = {'questions': questions}
-#         return render(request, 'Quiz/home.html', context)
+def get_csrf_token_view(request):
+    return JsonResponse({'csrftoken': get_token(request)})
 
+# Widok dla pytań
+class QuesModelAPIView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        questions = QuesModel.objects.all()
+        serializer = QuesModelSerializer(questions, many=True)
+        return Response(serializer.data)
+
+    def post(self, request):
+        serializer = QuesModelSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+class QuesDetailAPIView(APIView):
+   
+    def get_object(self, pk):
+        try:
+            return QuesModel.objects.get(pk=pk)
+        except QuesModel.DoesNotExist:
+            return None
+
+    def get(self, request, pk):
+        question = self.get_object(pk)
+        if not question:
+            return Response({"error": "Not found"}, status=status.HTTP_404_NOT_FOUND)
+        serializer = QuesModelSerializer(question)
+        return Response(serializer.data)
+
+    def put(self, request, pk):
+        question = self.get_object(pk)
+        if not question:
+            return Response({"error": "Not found"}, status=status.HTTP_404_NOT_FOUND)
+        serializer = QuesModelSerializer(question, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk):
+        question = self.get_object(pk)
+        if not question:
+            return Response({"error": "Not found"}, status=status.HTTP_404_NOT_FOUND)
+        question.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+class QuestionDetail(APIView):
+    def delete(self, request, id, format=None):
+        try:
+            question = QuesModel.objects.get(pk=id)
+            question.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except QuesModel.DoesNotExist:
+            return Response({'error': 'Pytanie nie istnieje'}, status=status.HTTP_404_NOT_FOUND)
+        
+# Widok dla użytkowników
+class UserAPIView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        users = User.objects.all()
+        serializer = UserSerializer(users, many=True)
+        return Response(serializer.data)
+
+#------------------------------------------------------------------------------------------------------
 def home(request):
 
     if not request.user.is_authenticated:

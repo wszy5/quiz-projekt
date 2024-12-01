@@ -2,11 +2,11 @@
 {% extends 'Quiz/dependencies.html' %}
 {% block content %}
 <div class="container">
-    <h2 class="text-center mb-4">Mój Profil</h2>
-
-    <h4>Średnia z wyników: {{ avg_percent|floatformat:2 }}%</h4>
-
-    <h5 class="mt-4">Twoje wyniki:</h5>
+    <div class="card" style="width: fit-content; padding: 1%;">
+        <h2>Mój Profil</h2>
+        <h4>Średnia z wyników: {{ avg_percent|floatformat:2 }}%</h4>
+        <h5>Twoje wyniki:</h5>
+    </div>
     {% if results %}
         <table class="table">
             <thead>
