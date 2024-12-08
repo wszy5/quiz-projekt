@@ -1,23 +1,18 @@
-from django.shortcuts import redirect,render
-from django.contrib.auth import login,logout,authenticate
-from .forms import *
-from .models import *
-from django.http import HttpResponse
-from django.shortcuts import render, redirect
-from django.contrib.auth import authenticate, login
+from django.shortcuts import render, redirect, get_object_or_404
+from django.http import HttpResponse, JsonResponse
+from django.contrib.auth import login, logout, authenticate
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib import messages
+from django.middleware.csrf import get_token
+from django.contrib.auth.models import User
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, permissions
-from .models import QuesModel
-from .serializers import QuesModelSerializer, UserSerializer
-from django.contrib.auth.models import User
 from rest_framework.permissions import AllowAny
-from django.http import JsonResponse
-from django.middleware.csrf import get_token
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
-from Quiz.models import QuesModel
+from .forms import *
+from .models import QuesModel, UserProfile, QuizResult
+from .serializers import QuesModelSerializer, UserSerializer
+
 
 def get_csrf_token_view(request):
     return JsonResponse({'csrftoken': get_token(request)})
@@ -149,7 +144,6 @@ def addQuestion(request):
     else: 
         return redirect('home') 
 
-
 def registerPage(request):
     if request.user.is_authenticated:
         return redirect('home')
@@ -167,21 +161,27 @@ def registerPage(request):
         context = {'form': form}
         return render(request, 'Quiz/register.html', context)
 
-
 def loginPage(request):
     if request.user.is_authenticated:
-        return redirect('home')
+        # Sprawdź, czy użytkownik jest moderatorem
+        if request.user.groups.filter(name='Moderator').exists():
+            return redirect('moderator_panel')
+        return redirect('home')  # Domyślne przekierowanie dla innych użytkowników
     else:
-       if request.method=="POST":
-        username=request.POST.get('username')
-        password=request.POST.get('password')
-        user=authenticate(request,username=username,password=password)
-        if user is not None:
-            login(request,user)
-            return redirect('/')
-       context={}
-       return render(request,'Quiz/login.html',context)
-
+        if request.method == "POST":
+            username = request.POST.get('username')
+            password = request.POST.get('password')
+            user = authenticate(request, username=username, password=password)
+            if user is not None:
+                login(request, user)
+                # Przekierowanie w zależności od grupy użytkownika
+                if user.groups.filter(name='Moderator').exists():
+                    return redirect('moderator_panel')
+                return redirect('home')
+            else:
+                messages.error(request, "Nieprawidłowe dane logowania.")
+        context = {}
+        return render(request, 'Quiz/login.html', context)
 
 def login_with_pin(request):
     if request.method == 'POST':
@@ -193,6 +193,9 @@ def login_with_pin(request):
             user_profile = UserProfile.objects.get(user=user)
             if user_profile.pin == pin:
                 login(request, user)
+                # Przekierowanie w zależności od grupy użytkownika
+                if user.groups.filter(name='Moderator').exists():
+                    return redirect('moderator_panel')
                 return redirect('home')
             else:
                 context = {'error': 'Nieprawidłowy PIN'}
@@ -202,11 +205,31 @@ def login_with_pin(request):
         context = {}
     return render(request, 'Quiz/login_with_pin.html', context)
 
+@login_required
 def profile(request):
-    # Pobieramy wszystkie wyniki użytkownika
-    results = QuizResult.objects.filter(user=request.user).order_by('-created_at')
+    is_moderator = request.user.groups.filter(name='Moderator').exists()
 
-    # Obliczamy średnią procentową z wyników
+    if is_moderator:
+        # Pobierz użytkowników do zarządzania przez moderatora
+        users = User.objects.exclude(groups__name='Moderator').exclude(is_superuser=True)
+        results = [
+            {
+                'id': user.id,
+                'username': user.username,
+                'email': user.email,
+                'score': sum([result.score for result in user.quizresult_set.all()])
+            }
+            for user in users
+        ]
+
+        context = {
+            'results': results,
+            'is_moderator': True,
+        }
+        return render(request, 'Quiz/moderator_profile.html', context)
+
+    # Standardowy profil użytkownika
+    results = QuizResult.objects.filter(user=request.user).order_by('-created_at')
     avg_percent = 0
     if results.exists():
         avg_percent = sum([result.percent for result in results]) / len(results)
@@ -214,12 +237,44 @@ def profile(request):
     context = {
         'results': results,
         'avg_percent': avg_percent,
+        'is_moderator': False,
     }
     return render(request, 'Quiz/profile.html', context)
 
+@login_required
+def delete_user(request, user_id):
+    user = get_object_or_404(User, pk=user_id)
+    user.delete()
+    messages.success(request, f'Użytkownik {user.username} został usunięty.')
+    return redirect('moderator_panel')
 
+@login_required
 def logoutPage(request):
     logout(request)
     return redirect('/')
 
+@login_required
+def moderator_panel(request):
+    if not request.user.groups.filter(name='Moderator').exists():
+        messages.error(request, "Nie masz dostępu do tego panelu.")
+        return redirect('home')
+
+    # users = User.objects.exclude(groups__name='Admin')  # Pomijamy adminów
+    users = User.objects.exclude(groups__name__in=['Admin', 'Moderator'])
+
+    user_data = [
+        {
+            'id': user.id,  # Dodajemy id użytkownika
+            'username': user.username,
+            'email': user.email,
+            'points': sum(
+                QuizResult.objects.filter(user=user).values_list('score', flat=True)
+            ),  # Przykład obliczania punktów
+        }
+        for user in users
+    ]
+
+    user_data = sorted(user_data, key=lambda x: x['points'], reverse=True)
+
+    return render(request, 'Quiz/moderator_panel.html', {'user_data': user_data})
 

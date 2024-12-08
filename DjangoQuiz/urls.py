@@ -20,9 +20,8 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.urls import path
 
-
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path('admin', admin.site.urls),
     path('', home,name='home'),
     path('addQuestion/', addQuestion,name='addQuestion'),
     path('login/', loginPage,name='login'),
@@ -34,5 +33,8 @@ urlpatterns = [
     path('api/questions/<int:pk>/', QuesDetailAPIView.as_view(), name='api_question_detail'),  # Nowa ścieżka
     path('api/users/', UserAPIView.as_view(), name='api_users'),
     path('api/get_csrf_token/', get_csrf_token_view, name='get_csrf_token_view'),
+    path('moderator/panel/', moderator_panel, name='moderator_panel'),
+    path('delete-user/<int:user_id>/', delete_user, name='delete_user'),
 ]
+
 urlpatterns+=static(settings.MEDIA_URL,document_root=settings.MEDIA_ROOT)

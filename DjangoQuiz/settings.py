@@ -70,6 +70,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'Quiz.context_processors.add_is_moderator',
             ],
         },
     },
@@ -130,3 +131,5 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS=[BASE_DIR/'static']
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+CSRF_TRUSTED_ORIGINS = ['http://localhost:8000']

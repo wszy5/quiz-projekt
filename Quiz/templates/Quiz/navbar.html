@@ -1,29 +1,25 @@
 {% load static %}
-
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
   <div class="container">
-    <!-- Brand/logo -->
-
     <a class="navbar-brand" href="{% url 'home' %}">
       <img src="{% static '/images/goat.png' %}" alt="Logo" style="max-height: 40px; margin-right: 10px;">
       Gwara Wlkp Quiz
-    </a>
+      <!-- <p>Is moderator: {{ is_moderator }}</p> -->
 
-    <!-- Toggler for mobile view -->
+    </a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
 
-    <!-- Navbar items -->
     <div class="collapse navbar-collapse" id="navbarNav">
       <ul class="navbar-nav ml-auto">
         {% if request.user.is_authenticated %}
-          <!-- User profile and logout for authenticated users -->
-          <li class="nav-item">
-            <a class="nav-link" href="{% url 'profile' %}">Mój Profil</a>
-          </li>
-          <!-- navbar.html -->
-
+          {% if not is_moderator %}
+            <!-- Link dla standardowego użytkownika -->
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'profile' %}">Mój Profil</a>
+            </li>
+          {% endif %}
           <li class="nav-item">
             <span class="nav-link greet">{{ request.user.username }}</span>
           </li>
@@ -31,7 +27,6 @@
             <a class="btn btn-outline-light btn-sm" href="{% url 'logout' %}">Wyloguj</a>
           </li>
         {% else %}
-          <!-- Login and login with PIN for unauthenticated users -->
           <li class="nav-item">
             <a class="nav-link" href="{% url 'login' %}">Zaloguj</a>
           </li>

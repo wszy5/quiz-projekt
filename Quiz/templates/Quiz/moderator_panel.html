@@ -1,0 +1,31 @@
+{% extends 'Quiz/dependencies.html' %}
+{% load static %}
+{% block content %}
+<div class="container d-flex justify-content-center align-items-center" style="height: 100vh;">
+    <div class="card shadow-lg p-2" style="width: 40rem; background: rgba(255, 255, 255, 0.9); border-radius: 15px;">
+        <h1>Panel moderatora</h1>
+    <table>
+        <tr>
+            <th>Użytkownik</th>
+            <!-- <th>Email</th> -->
+            <th>Punkty</th>
+            <th>Akcje</th>
+        </tr>
+        {% for user in user_data %}
+        <tr>
+            <td>{{ user.username }}</td>
+            <!-- <td>{{ user.email }}</td> -->
+            <td>{{ user.points }}</td>
+            <td>
+                <form method="post" action="{% url 'delete_user' user.id %}">
+                    {% csrf_token %}
+                    <button type="submit">Usuń</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+    <a href="{% url 'logout' %}">Wyloguj się</a>
+    </div>
+</div>
+{% endblock %}
